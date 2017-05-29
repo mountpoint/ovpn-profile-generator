@@ -40,6 +40,46 @@ clientCertName="${profileName}.crt"
 clientExampleProfile=client_example.ovpn
 clientProfile="${profileName}.ovpn"
 
+if [ ! -f $keysDir/$clientExampleProfile ];
+    then
+        serverIP=''
+
+        while [ -z $serverIP ]; do
+            read -p "Enter server hostname or IP: " serverIP
+        done
+
+        cat > $keysDir/$clientExampleProfile << END
+client
+;dev tap
+dev tun
+;dev-node MyTap
+;proto tcp
+proto udp
+remote $serverIP 1194
+;remote my-server-2 1194
+;remote-random
+resolv-retry infinite
+nobind
+user nobody
+group nogroup
+persist-key
+persist-tun
+;http-proxy-retry
+;http-proxy [proxy server] [proxy port #]
+;mute-replay-warnings
+;ca ca.crt
+;cert client.crt
+;key client.key
+ns-cert-type server
+;tls-auth ta.key 1
+;cipher x
+comp-lzo
+verb 3
+;mute 20
+END
+
+fi
+
 if [ ! -f $keysDir/$clientProfile ];
 then
     source $scriptsDir/vars
