@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# write new line
+nl() {
+    echo $'\n'
+}
+
+writeMessage() {
+    echo "==== $1"
+}
+
+writeOkMessage() {
+    # Bash colors - http://misc.flogisoft.com/bash/tip_colors_and_formatting
+    echo -e "\e[32m[ok]\e[0m $1"
+}
+
+writeFailMessage() {
+    echo -e "\e[31m[fail]\e[0m $1"
+}
+
+# message with green background
+writeSuccessMessage() {
+    echo -e "\e[30;42;5;82m $1 \e[0m"
+}
+
+openvpnDir=/etc/openvpn
+scriptsDir=$openvpnDir/easy-rsa
+keysDir=$scriptsDir/keys
+ovpnDownloadDir=/var/www/ovpn
+
+profileName=''
+
+while [ -z $profileName ]; do
+    read -p "Enter profile name: " profileName
+done
+
+caCertName=ca.crt
+clientKeyName="${profileName}.key"
+clientCertName="${profileName}.crt"
+clientExampleProfile=client_example.ovpn
+clientProfile="${profileName}.ovpn"
+
+if [ ! -f $keysDir/$clientProfile ];
+then
+    source $scriptsDir/vars
+    $scriptsDir/build-key $profileName
+
+    cp $keysDir/$clientExampleProfile $keysDir/$clientProfile
+
+    nl
+
+    # Add the Certificate Authority
+    echo '<ca>' >> $keysDir/$clientProfile
+    cat $openvpnDir/$caCertName >> $keysDir/$clientProfile
+    echo '</ca>' >> $keysDir/$clientProfile
+    writeOkMessage "Certificate Authority has been added to client profile"
+
+    # Add the certificate
+    echo '<cert>' >> $keysDir/$clientProfile
+    cat $keysDir/$clientCertName >> $keysDir/$clientProfile
+    echo '</cert>' >> $keysDir/$clientProfile
+    writeOkMessage "Certificate has been added to client profile"
+
+    # Add the key
+    echo '<key>' >> $keysDir/$clientProfile
+    cat $keysDir/$clientKeyName >> $keysDir/$clientProfile
+    echo '</key>' >> $keysDir/$clientProfile
+    writeOkMessage "Key has been added to client profile"
+
+    cp $keysDir/$clientProfile $ovpnDownloadDir/$clientProfile
+
+    nl
+    writeMessage "File copied in ${ovpnDownloadDir} folder"
+    nl
+    writeSuccessMessage "Done."
+else
+    writeFailMessage "Profile ${profileName} already created"
+fi
