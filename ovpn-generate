@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# write new line
+# write a new line
 nl() {
     echo $'\n'
 }
