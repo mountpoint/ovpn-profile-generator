@@ -1,7 +1,7 @@
 Interactive OpenVPN profile generator
 ========================
 
-v0.1.0
+v0.1.1
 
 ## Instructions (Debian)
 
