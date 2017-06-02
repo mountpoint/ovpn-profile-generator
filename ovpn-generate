@@ -16,6 +16,7 @@ writeOkMessage() {
 
 writeFailMessage() {
     echo -e "\e[31m[fail]\e[0m $1"
+    exit 1
 }
 
 # message with green background
